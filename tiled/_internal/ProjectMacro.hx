@@ -117,6 +117,7 @@ class ProjectMacro {
     final display = Context.defined("display");
     final projectMode = Context.definedValue("tiled-props") == "project";
     var name = nameOf(Context.getLocalType().getClass());
+    // TODO: Make it a meta
     if (name == "PropertyClass") return null; // Don't build anything for internal Property fill-in.
     
     var color: String = "#ffffffff";
@@ -235,6 +236,7 @@ class ProjectMacro {
                 }
               }
             }
+            // TODO: Allow multiple constructor fallbacks if all types are optional
             simpleConstructor = (fun.args.length == 0 || Lambda.find(fun.args, (v) -> !v.opt) == null);
           }
           
@@ -470,9 +472,19 @@ class ProjectMacro {
       if (propKind != null) {
         // TODO: Default value for enums
         // FIXME: Array :tname does not work for array subs
-        var val = try {
-          defVal.getValue();
-        } catch (e: String) { propDef; }
+        function extractDefVal(expr: Expr): Dynamic {
+          return try {
+            switch (expr.expr) {
+              case EArrayDecl(values):
+                [for (e in values) extractDefVal(e)];
+              case EConst(CInt(s)) if (propKind == KColor):
+                "#"+Std.parseInt(s).hex(8);
+              default:
+                expr.getValue();
+            }
+          } catch (e: Dynamic) { propDef; }
+        }
+        var val = extractDefVal(defVal);
         function makeProp(name: String) {
           var prop: TmxJsonProperty = {
             name: name,

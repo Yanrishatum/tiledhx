@@ -10,7 +10,7 @@
 # --macro tiled.types.Macros.addObjectData("test", "Int")
 --macro tiled.project.TiledProject.generateProject("test/test2.tiled-project")
 -D tiledhx
--lib heeps
+-lib heaps
 -lib hlsdl
 # -lib format-tiled
 -hl test/test.hl

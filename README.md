@@ -8,14 +8,65 @@ A complete rewrite of the [format-tiled](https://github.com/Yanrishatum/haxe-for
 With having unified loader, we can use general cache between loading multiple maps, reducing loading times on average.
 * Since Tiled 1.9 `type` was renamed into `class` in Tiled. Due to it being a keyword, whether something has a `class` it would be named as `type` instead. And author officially confirmed that he won't change keyword usage because he does not want to make breaking changes <!-- lol, break shit in 1.9 @ don't want to break shit again to unbreak it in 1.10, but still make breaking change that restores compat. -->
 * Library has 2 distinct property parsing modes, see [Object Type integration](#object-type-integration) section for more information.
-* Library opts to not parse a number of things to avoid extra processing, but it can be re-enabled via debug flags if you need said data.
-* Compared to `format-tiled`, this library does not try to be completely framework-agnostic. It still is, however it offers framework integrations out of the box.
+* In order to reduce data processing load, library opts to not parse a number of things. However it can be re-enabled via [define flags](#define-flags) if you need said data.
+* Compared to `format-tiled`, this library does not try to be completely framework-detached. It still is framework-agnostic, however it offers framework integrations out of the box.
 
 ## Usage
 
- TODO
+1. Install library from Haxelib:
+  ```cmd
+  haxelib install tiledhx
+  ```
+  Or for dev build from git:
+  ```cmd
+  haxelib git tiledhx https://github.com/Yanrishatum/tiledhx
+  ```
+2. Add the library in HXML file:
+  ```hxml
+  -lib tiledhx
+  ```
+  * If you want to run in `project` mode, add the following define to HXML file:
+    ```hxml
+    -D tiled_props=project
+    ```
+3. Load the maps in the following manner:
+```haxe
+// Create the loader. You should store it in a static variable somewhere
+// so you can reuse it for loading multiple maps.
+var loader = new tiled.Tiled();
+// Assign the loader methods. In case of supported backends you won't need to do that.
+loader.loadXML = myAssetManager.loadXML;
+loader.loadJson = myAssetManager.loadJson;
+// Optionally you can assign image loaders, see custom types section.
+// loader.loadImage
+// loader.loadTileset
+// loader.subRegion
 
-## Using custom types for specific elements.
+// Load the TmxMap itself:
+var map = loader.loadTMX("path/to/map.tmx");
+// Flat iterator allows you to iterate all of the layers even if your map contains nested layer groups.
+// If you want to crawl in a nested manner - iterate over `map.layers`.
+for (layer in map.flatIterator()) {
+  switch (layer.kind) {
+    case TTileLayer:
+      // Use layer.tileChunks or layer.tiles to load the tile layer.
+      // If your map is infinite (map.infinite), you _should_ use layer.tileChunks
+    case TObjectGroup:
+      // Load your objects
+    case TImageLayer:
+      // Load the layer consisting of a single image.
+    case TGroup:
+      // The layer subgroup.
+      // Because we're using flat iterator, after this layer you will receive
+      // sub-layer of that group
+      // You also can access them via `layer.subLayers`.
+  }
+}
+```
+
+For an example of project generation see samples.
+
+## Using custom types for specific elements
 
 It's possible to override various types to use ones from your engine to reduce the amount of extra passes and conversions between Tiled types and engine types.
 
@@ -66,7 +117,7 @@ If `initX` methods are present, the constructor and `@:useAs` metadata are ignor
 * By having a constructor take a tiled type as its only argument. I.e. `function new(obj: TmxObject)` would denote it as compatible only with `TmxObject`.
 * By using `@:useAs()` metadata on the class. It is only usable if your constructor takes no arguments or all arguments are strictly optional. This limitation is not enforced in `dynamic` mode.
 For it to work use the following syntax: `@:useAs(tile, object, layer, ...)` with types you wish that class to be compatible with.
-Note that it is compatible with the constructor taking one argument notation. I.e. `new(?obj: TmxObject)` and `@:useAs(tile)` will denote class as compatible both with `TmxObject` and `TmxTile` and therefore generate `initObject` and `initTile` methods (in case of `project` mode). Keep in mind that declaring `@:useAs(object)` in example above will lead to a compilation error due to `initObject` being generated twice - from `@:useAs` and from constructor notation.
+Note that it is compatible with the constructor taking one argument notation. I.e. `new(?obj: TmxObject)` and `@:useAs(tile)` will denote class as compatible both with `TmxObject` and `TmxTile` and therefore generate `initObject` and `initTile` methods (in case of `project` mode).
 
 The following init methods are supported:
 * `initObject(object: TmxObject)`
@@ -105,8 +156,8 @@ Supported field types are:
 * `Bool` - the field will be exposed as a `boolean` property.
 * `TmxObject` - the field will be exposed as an object reference property. This will add a hidden `${fieldName}ID` variable to the class that will contain the object ID, and instance itself will be set during secondary finalization pass after all objects are parsed.
 * Any class that implements `TiledClass` interface - will be exposed as a nested class field.
-  * By using `@:tvar(object)` hint - will expose it as an object reference property, however when loading it will only load the instance if referenced object is of that type.
-    This can be used to directly reference underlying object type skipping the `TmxObject` instance.
+  <!-- * By using `@:tvar(object)` hint - will expose it as an object reference property, however when loading it will only load the instance if referenced object is of that type.
+    This can be used to directly reference underlying object type skipping the `TmxObject` instance. -->
   > **Note:** Macro does not verify that referenced `TiledClass` exposes itself as compatible with `property` kind, and _will_ lead to compilation errors if it isn't.
 * Any `enum` - Will expose the Haxe enum to Tiled. See about [enums](tiled-enums-vs-haxe-enums) below.
   * By using `@:tvar(string)` hint - the property will use a `string` type with enum names to store the values.
