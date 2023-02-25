@@ -1,0 +1,176 @@
+{
+    "folders": [],
+    "automappingRulesFile": "",
+    "propertyTypes": [
+        {
+            "name": "SubInst",
+            "color": "#ffffffff",
+            "useAs": [
+                "property"
+            ],
+            "id": 1,
+            "type": "class",
+            "members": [
+                {
+                    "name": "x",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "y",
+                    "type": "float",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "name": "TestEnum",
+            "valuesAsFlags": false,
+            "id": 2,
+            "storageType": "int",
+            "values": [
+                "ValueA",
+                "ValueB",
+                "ValueC"
+            ],
+            "type": "enum"
+        },
+        {
+            "name": "TestEnum_s",
+            "valuesAsFlags": false,
+            "id": 3,
+            "storageType": "string",
+            "values": [
+                "ValueA",
+                "ValueB",
+                "ValueC"
+            ],
+            "type": "enum"
+        },
+        {
+            "name": "TestEnum_f",
+            "valuesAsFlags": true,
+            "id": 4,
+            "storageType": "int",
+            "values": [
+                "ValueA",
+                "ValueB",
+                "ValueC"
+            ],
+            "type": "enum"
+        },
+        {
+            "name": "TestEnum_fs",
+            "valuesAsFlags": true,
+            "id": 5,
+            "storageType": "string",
+            "values": [
+                "ValueA",
+                "ValueB",
+                "ValueC"
+            ],
+            "type": "enum"
+        },
+        {
+            "name": "InstProps",
+            "color": "#ffffffff",
+            "useAs": [
+                "object"
+            ],
+            "id": 6,
+            "type": "class",
+            "members": [
+                {
+                    "name": "str",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "file",
+                    "type": "file",
+                    "value": ""
+                },
+                {
+                    "name": "color",
+                    "type": "color",
+                    "value": ""
+                },
+                {
+                    "name": "ival",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "icolor",
+                    "type": "color",
+                    "value": 0
+                },
+                {
+                    "name": "iobj",
+                    "type": "object",
+                    "value": 0
+                },
+                {
+                    "name": "float",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "ifloat",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "ref",
+                    "type": "object"
+                },
+                {
+                    "name": "arr",
+                    "type": "object"
+                },
+                {
+                    "name": "bool",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "subClass",
+                    "propertyType": "SubInst",
+                    "type": "class"
+                },
+                {
+                    "name": "ienum",
+                    "propertyType": "TestEnum",
+                    "type": "int"
+                },
+                {
+                    "name": "senum",
+                    "propertyType": "TestEnum_s",
+                    "type": "string"
+                },
+                {
+                    "name": "ienumFlags",
+                    "propertyType": "TestEnum_f",
+                    "type": "int"
+                },
+                {
+                    "name": "senumFlags",
+                    "propertyType": "TestEnum_fs",
+                    "type": "string"
+                },
+                {
+                    "name": "senumArray",
+                    "propertyType": "TestEnum_f",
+                    "type": "int"
+                },
+                {
+                    "name": "ienumArray",
+                    "propertyType": "TestEnum_f",
+                    "type": "int"
+                }
+            ]
+        }
+    ],
+    "commands": [],
+    "extensionsPath": ""
+}

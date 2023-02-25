@@ -1,0 +1,244 @@
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "compatibilityVersion": 1080,
+    "extensionsPath": "extensions",
+    "folders": [
+        "res"
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffffaa00",
+            "id": 5,
+            "members": [
+                {
+                    "name": "color",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "en",
+                    "propertyType": "EnumNumber",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "enm",
+                    "propertyType": "EnumNumberMultiple",
+                    "type": "int",
+                    "value": 6
+                },
+                {
+                    "name": "es",
+                    "propertyType": "EnumString",
+                    "type": "string",
+                    "value": "EnumString_3"
+                },
+                {
+                    "name": "esm",
+                    "propertyType": "EnumStringMultiple",
+                    "type": "string",
+                    "value": "EnumStringMultiple_1,EnumStringMultiple_2"
+                },
+                {
+                    "name": "file",
+                    "type": "file",
+                    "value": ""
+                },
+                {
+                    "name": "flag",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "float",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "int",
+                    "type": "int",
+                    "value": 5
+                },
+                {
+                    "name": "obj",
+                    "type": "object",
+                    "value": 0
+                },
+                {
+                    "name": "str",
+                    "type": "string",
+                    "value": "strval"
+                },
+                {
+                    "name": "str_big",
+                    "type": "string",
+                    "value": "Some big text\nthat has\nnewlines\nand such,\nwhich likely\ngoing to be\nstores as\nCDATA chunk.\nWith \"quotes\".\n'both types'\nEven `apostrofes`\nbecause why not"
+                }
+            ],
+            "name": "Class0",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "id": 6,
+            "members": [
+                {
+                    "name": "sub",
+                    "propertyType": "Class0",
+                    "type": "class",
+                    "value": {
+                        "color": "#ff7b0000",
+                        "en": 2,
+                        "enm": 4,
+                        "es": "EnumString_1",
+                        "esm": "EnumStringMultiple_2,EnumStringMultiple_3"
+                    }
+                },
+                {
+                    "name": "test",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "Class1",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "id": 7,
+            "members": [
+                {
+                    "name": "c4",
+                    "propertyType": "Class4",
+                    "type": "class",
+                    "value": {
+                    }
+                }
+            ],
+            "name": "Class2",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "id": 8,
+            "members": [
+                {
+                    "name": "b",
+                    "type": "bool",
+                    "value": true
+                }
+            ],
+            "name": "Class3",
+            "type": "class",
+            "useAs": [
+                "property",
+                "tile"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "id": 9,
+            "members": [
+                {
+                    "name": "c3",
+                    "propertyType": "Class3",
+                    "type": "class",
+                    "value": {
+                    }
+                }
+            ],
+            "name": "Class4",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
+        },
+        {
+            "id": 3,
+            "name": "EnumNumber",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "EnumNumber_1",
+                "EnumNumber_2",
+                "EnumNumber_3"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 4,
+            "name": "EnumNumberMultiple",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "EnumNumberMultiple_1",
+                "EnumNumberMultiple_2",
+                "EnumNumberMultiple_3"
+            ],
+            "valuesAsFlags": true
+        },
+        {
+            "id": 1,
+            "name": "EnumString",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "EnumString_1",
+                "EnumString_2",
+                "EnumString_3"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 2,
+            "name": "EnumStringMultiple",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "EnumStringMultiple_1",
+                "EnumStringMultiple_2",
+                "EnumStringMultiple_3"
+            ],
+            "valuesAsFlags": true
+        }
+    ]
+}

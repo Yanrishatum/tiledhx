@@ -1,0 +1,16 @@
+-cp test
+-cp .
+-main Main
+
+-D tiled_metadata
+# -D tiled_props=dynamic
+-D tiled_props=project
+
+# --macro nullSafety("tiled", StrictThreaded)
+# --macro tiled.types.Macros.addObjectData("test", "Int")
+--macro tiled.project.TiledProject.generateProject("test/test2.tiled-project")
+-D tiledhx
+-lib heeps
+-lib hlsdl
+# -lib format-tiled
+-hl test/test.hl

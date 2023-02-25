@@ -1,0 +1,10 @@
+{
+  "name": "tiledhx",
+  "description": "A comprehensive modern Tiled parser.",
+  "tags": ["tiled", "map", "parser", "tmx"],
+  "releasenote": "Initial public version",
+  "version": "1.0.0",
+  "url": "https://github.com/yanrishatum/tiledhx",
+  "license": "MIT",
+  "contributors": ["Yanrishatum"]
+}

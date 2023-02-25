@@ -1,0 +1,6 @@
+dump
+*.hl
+*.tiled-session
+test/res/tiled
+test/res/img
+test/res/maps
