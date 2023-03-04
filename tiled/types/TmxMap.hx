@@ -182,8 +182,15 @@ class TmxMap {
       }
     }
     
+    // FIXME: Finalize on tsx tiles invoked multiple times
     #if (tiled_props=="project")
     if (tclass != null) tclass.finalize(objects, path, loader);
+    for (tset in tilesets) {
+      tset.tclass.finalize(objects, path, loader);
+      for (t in tset.tiles) if (t != null) {
+        t.tclass.finalize(objects, path, loader);
+      }
+    }
     function finalizeProps(layers:Array<TmxLayer>) {
       for (l in layers) {
         l.tclass.finalize(objects, path, loader);
@@ -195,6 +202,13 @@ class TmxMap {
     #else
     if (type != null && type != "")
       properties.inherit(loader.getObjectType(type));
+    
+    for (tset in tilesets) {
+      tset.properties.finalize(objects, path, loader);
+      for (t in tset.tiles) if (t != null) {
+        t.properties.finalize(objects, path, loader);
+      }
+    }
     
     function finalizeProps(layers:Array<TmxLayer>, objects:Array<TmxObject>) {
       for (l in layers) {
@@ -243,20 +257,20 @@ class TmxMap {
   }
   
   
-  public function flatIterator():Iterator<TmxLayer> {
+  public inline function flatIterator():Iterator<TmxLayer> {
     return new FlatIterator(this.layers);
   }
 }
 
+@:structInit private class FlatIteratorStackValue {
+  public var caret: Int;
+  public var layers: Array<TmxLayer>;
+}
 private class FlatIterator {
   
-  var stack: Array<{ caret: Int, layers: Array<TmxLayer> }>;
-  var nest:Array<Array<TmxLayer>>;
-  var carets:Array<Int>;
+  var stack: Array<FlatIteratorStackValue>;
   public inline function new(root:Array<TmxLayer>) {
     stack = root.length == 0 ? [] : [{ caret: 0, layers: root }];
-    nest = [root];
-    carets = root.length == 0 ? [] : [0];
   }
   
   public inline function hasNext():Bool {

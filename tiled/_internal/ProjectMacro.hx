@@ -38,19 +38,26 @@ class ProjectMacro {
     #end
   ];
   
+  static inline function extractTname(meta: MetadataEntry, def: String) {
+    return if (meta.params == null || meta.params.length == 0) {
+      Context.warning("Invalid @:tname parameter! Expected a string!", meta.pos);
+      def;
+    } else try {
+      switch (meta.params[0].expr) {
+        case EConst(CIdent(s) | CString(s)):
+          s;
+        default:
+          Context.warning("Invalid @:tname parameter! Expceted a string!", meta.pos);
+          def;
+      }
+    } catch (_) {
+      def;
+    }
+  }
+  
   static function nameOf(t: BaseType) {
     if (t.meta.has(":tname")) {
-      try {
-        switch (t.meta.extract(":tname")[0].params[0].expr) {
-          case EConst(CIdent(s) | CString(s)):
-            return s;
-          default:
-            Context.warning("Invalid @:tname parameter! Expceted a string!", t.pos);
-            return t.name;
-        }
-      } catch (_) {
-        return t.name;
-      }
+      return extractTname(t.meta.extract(":tname")[0], t.name);
     }
     return t.name;
   }
@@ -116,51 +123,108 @@ class ProjectMacro {
     var props: Array<TmxJsonProperty> = [];
     final display = Context.defined("display");
     final projectMode = Context.definedValue("tiled-props") == "project";
-    var name = nameOf(Context.getLocalType().getClass());
-    // TODO: Make it a meta
-    if (name == "PropertyClass") return null; // Don't build anything for internal Property fill-in.
     
     var color: String = "#ffffffff";
     var localClass = Context.getLocalClass().get();
     var classMeta = localClass.meta;
     var pos = localClass.pos;
-    Compiler.keep(Context.getLocalClass().toString());
-    if (classMeta.has(":tcolor")) {
-      var col = classMeta.extract(":tcolor")[0];
-      if (col.params.length < 1) Context.warning("Invalid @:tcolor meta, expected argument with type color (string hash notation or int)!", col.pos);
-      else {
-        switch (col.params[0].expr) {
-          case EConst(CString(s, _)) if (s.charCodeAt(0) == "#".code):
-            if (s.length == 4) s = "#F" + s.substr(1); // #RGB->#ARGB
-            if (s.length == 5) {
-              var a = s.charAt(1);
-              var r = s.charAt(2);
-              var g = s.charAt(3);
-              var b = s.charAt(4);
-              color = "#" + a + a + r + r + g + g + b + b;
-            } else {
-              if (s.length == 7) s = "#FF" + s.substr(1); // #RRGGBB -> #AARRGGBB
-              color = s;
-            }
-          case EConst(CInt(_.toLowerCase() => h)) if (h.startsWith("0x")):
-            if (h.length <= 8) { // No alpha
-              color = "#ff" + h.substr(2).lpad("0", 6);
-            } else {
-              color = "#" + h.substr(2);
-            }
-          case EConst(CInt(Std.parseInt(_) => i)):
-            if ((i & 0xff000000) == 0) i &= 0xff000000;
-            color = "#" + i.hex(8);
-          default: Context.warning("Invalid @:tcolor meta, expected argument with type color (string hash notation or int)!", col.pos);
-        }
-      }
-    }
+    var name = localClass.name;
+    
     var useAs: Array<UseAsType> = [];
+    var useAsHints: Array<{ t: UseAsType, pos: Position, field: Field }> = [];
     var fallbackUseAs: UseAsType = null;
     var simpleConstructor: Bool = false;
     
+    var thisType = switch(Context.getLocalType().toComplexType()) { 
+      case TPath(p): p;
+      default: throw "assert";
+    }
+    
+    for (meta in classMeta.get()) {
+      switch (meta.name) {
+        case ":tname":
+          name = extractTname(meta, name);
+        case ":tcolor":
+          if (meta.params.length < 1) Context.warning("Invalid @:tcolor meta, expected argument with type color (string hash notation or int)!", meta.pos);
+          else {
+            switch (meta.params[0].expr) {
+              case EConst(CString(s, _)) if (s.charCodeAt(0) == "#".code):
+                if (s.length == 4) s = "#F" + s.substr(1); // #RGB->#ARGB
+                if (s.length == 5) {
+                  var a = s.charAt(1);
+                  var r = s.charAt(2);
+                  var g = s.charAt(3);
+                  var b = s.charAt(4);
+                  color = "#" + a + a + r + r + g + g + b + b;
+                } else {
+                  if (s.length == 7) s = "#FF" + s.substr(1); // #RRGGBB -> #AARRGGBB
+                  color = s;
+                }
+              case EConst(CInt(_.toLowerCase() => h)) if (h.startsWith("0x")):
+                if (h.length <= 8) { // No alpha
+                  color = "#ff" + h.substr(2).lpad("0", 6);
+                } else {
+                  color = "#" + h.substr(2);
+                }
+              case EConst(CInt(Std.parseInt(_) => i)):
+                if ((i & 0xff000000) == 0) i &= 0xff000000;
+                color = "#" + i.hex(8);
+              default: Context.warning("Invalid @:tcolor meta, expected argument with type color (string hash notation or int)!", meta.pos);
+            }
+          }
+        case ":useAs":
+          if (meta.params == null) {
+            Context.warning("@:useAs meta does not have parameters!", meta.pos);
+          } else for (e in meta.params) {
+            switch (e.expr) {
+              case EConst(CIdent(s) | CString(s)):
+                var initGen = useAsTypes[switch (s.toLowerCase()) {
+                  case "object": "initObject";
+                  case "tile": "initTile";
+                  case "layer": "initLayer";
+                  case "tileset": "initTileset";
+                  case "map": "initMap";
+                  case "property": "initProperty";
+                  case "wangcolor": "initWangColor";
+                  case "wangset": "initWangSet";
+                  default: "";
+                }];
+                if (initGen == null) {
+                  Context.warning("Unknown @:useAs type! Expected: object, tile, layer, tileset, map, property, wangcolor or wangset, got: " + s, e.pos);
+                } else {
+                  var hint = {
+                    t: initGen,
+                    pos: e.pos,
+                    field: null
+                  };
+                  useAsHints.push(hint);
+                  if (projectMode) hint.field = {
+                    name: initGen.name,
+                    pos: e.pos,
+                    access: [AStatic],
+                    doc: "Auto-generated from @:useAs meta",
+                    kind: FFun({
+                      args: [{ name: "arg", type: initGen.validate }],
+                      expr: macro {
+                        return new $thisType();
+                      }
+                    })
+                  };
+                }
+                
+              default: Context.warning("Invalid @:useAs meta parameter! Expected string/ident with applied type!", e.pos);
+            }
+          }
+        case ":noBuild":
+          return null;
+      }
+    }
+    
+    Compiler.keep(Context.getLocalClass().toString());
+    
     var loadProps: Array<Case> = [];
     var finalize: Array<Expr> = [];
+    var finalizeExtra: Array<Expr> = [];
     var loadUnknown: Expr = null; // An if...else chain
     var transfer: Array<Expr> = []; // Transfer from Tile to Object.
     
@@ -168,7 +232,9 @@ class ProjectMacro {
       loadUnknown = macro trace($v{name} + ": Was given uknown property " + prop + " = " + v);
     }
     
-    for (f in fields) {
+    var fi = 0;
+    while (fi < fields.length) {
+      var f = fields[fi++];
       if (f.meta == null) continue;
       
       var isTvar = false;
@@ -226,24 +292,47 @@ class ProjectMacro {
             if (fun.args.length != 1) Context.fatalError("Incorrect amount of arguments on initX! Expected 1!", f.pos);
             if (!compareCT(type.validate, fun.args[0].type)) Context.fatalError("Incorrect argument type on initX! Expected " + type.validate.toString() + ", got: " + fun.args[0].type.toString(), f.pos);
             useAs.push(type);
-          } else if (f.name == "new") {
-            if (fun.args.length == 1) {
-              var ctype = fun.args[0].type;
-              for (t in useAsTypes) {
-                if (compareCT(t.validate, ctype)) {
-                  fallbackUseAs = t;
-                  break;
+          } else switch (f.name) {
+            case "new":
+              if (fun.args.length == 1) {
+                var ctype = fun.args[0].type;
+                for (t in useAsTypes) {
+                  if (compareCT(t.validate, ctype)) {
+                    fallbackUseAs = t;
+                    break;
+                  }
                 }
               }
-            }
-            // TODO: Allow multiple constructor fallbacks if all types are optional
-            simpleConstructor = (fun.args.length == 0 || Lambda.find(fun.args, (v) -> !v.opt) == null);
+              // TODO: Allow multiple constructor fallbacks if all types are optional
+              simpleConstructor = (fun.args.length == 0 || Lambda.find(fun.args, (v) -> !v.opt) == null);
+            case "finalize":
+              // In case different names used: Assign variables under new names.
+              if (fun.args[0].name != "objects" && fun.args[0].name != "_") {
+                var rename = fun.args[0].name;
+                finalizeExtra.push(macro var $rename = objects);
+              }
+              if (fun.args[1].name != "path" && fun.args[1].name != "_") {
+                var rename = fun.args[1].name;
+                finalizeExtra.push(macro var $rename = path);
+              }
+              if (fun.args[2].name != "loader" && fun.args[2].name != "_") {
+                var rename = fun.args[1].name;
+                finalizeExtra.push(macro var $rename = loader);
+              }
+              finalizeExtra.push(fun.expr);
+              // Make sure to remove the original method.
+              fields.splice(fi-1, 1);
+              fi--;
+            case "loadProperties":
+              Context.fatalError("Implementation of loadProperties is not allowed!", f.pos);
+            case "transferToObject" | "transferToTileset":
+              // TODO: Allow custom code
+              Context.fatalError("Implementation of transfer methods is not allowed!", f.pos);
           }
-          
         case FProp(get, set, _t, e):
           if (isTvar && set == "never" || get == "never") {
             isTvar = false;
-            Context.warning("Cannot expose a property with a `never` write rule!", f.pos);
+            Context.warning("Cannot expose a property with a `never` read/write rule!", f.pos);
           }
           ft = _t; defVal = e;
       }
@@ -511,10 +600,6 @@ class ProjectMacro {
       }
     }
     
-    var thisType = switch(Context.getLocalType().toComplexType()) { 
-      case TPath(p): p;
-      default: throw "assert";
-    }
     if (useAs.length == 0) {
       if (fallbackUseAs != null) {
         useAs.push(fallbackUseAs);
@@ -532,45 +617,14 @@ class ProjectMacro {
         });
       }
     }
-    if (classMeta.has(":useAs")) {
-      if (!simpleConstructor && projectMode) Context.fatalError("@:useAs meta requires constructor to either take no arguments or all arguments being optional!", pos);
-      for (ua in classMeta.extract(":useAs")) {
-        for (e in ua.params) {
-          switch (e.expr) {
-            case EConst(CIdent(s) | CString(s)):
-              var initGen = useAsTypes[switch (s.toLowerCase()) {
-                case "object": "initObject";
-                case "tile": "initTile";
-                case "layer": "initLayer";
-                case "tileset": "initTileset";
-                case "map": "initMap";
-                case "property": "initProperty";
-                case "wangcolor": "initWangColor";
-                case "wangset": "initWangSet";
-                default: "";
-              }];
-              if (initGen == null) {
-                Context.warning("Unknown @:useAs type! Expected: object, tile, layer, tileset, map, property, wangcolor or wangset, got: " + s, e.pos);
-              } else if (initGen == fallbackUseAs) {
-                Context.warning("Attempting to apply @:useAs compatibility that is already declared via constructor!", e.pos);
-              } else {
-                useAs.push(initGen);
-                if (projectMode) fields.push({
-                  name: initGen.name,
-                  pos: e.pos,
-                  access: [AStatic],
-                  doc: "Auto-generated from @:useAs meta",
-                  kind: FFun({
-                    args: [{ name: "arg", type: initGen.validate }],
-                    expr: macro {
-                      return new $thisType();
-                    }
-                  })
-                });
-              }
-              
-            default: Context.warning("Invalid @:useAs meta parameter! Expected string/ident with applied type!", e.pos);
-          }
+    if (useAsHints.length > 0) {
+      if (!simpleConstructor && projectMode) Context.fatalError("@:useAs meta requires constructor to either take no arguments or all arguments being optional!", classMeta.extract(":useAs")[0].pos);
+      for (hint in useAsHints) {
+        if (hint.t == fallbackUseAs) {
+          Context.warning("Attempting to apply @:useAs compatibility that is already declared via constructor!", hint.pos);
+        } else {
+          useAs.push(hint.t);
+          if (projectMode) fields.push(hint.field);
         }
       }
     }
@@ -618,7 +672,7 @@ class ProjectMacro {
         access: [APublic],
         kind: FFun({
           args: [{ name: "objects", type: macro :Array<tiled.types.TmxObject> }, { name: "path", type: macro :String }, { name: "loader", type: macro :tiled.Tiled }],
-          expr: macro $b{finalize},
+          expr: macro { $b{finalize}; $b{finalizeExtra}; },
           ret: macro :Void,
         }),
         pos: pos,

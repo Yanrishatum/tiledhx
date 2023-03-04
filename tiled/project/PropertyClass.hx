@@ -6,6 +6,7 @@ import tiled.types.TmxLayer;
 import tiled.types.TmxObject;
 import tiled.types.TmxMap;
 
+@:noBuild
 class PropertyClass implements TiledClass {
   
   #if (tiled_props=="project")

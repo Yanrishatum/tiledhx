@@ -410,6 +410,7 @@ class TmxTileset {
         t.tileY = el.iatt('y');
         t.tileWidth = el.iatt('width', -1);
         t.tileHeight = el.iatt('height', -1);
+        t.imageTile = imageTiles[t.id];
         for (tel in el) if (tel.nodeType == Element) {
           switch (tel.nodeName) {
             case 'properties':

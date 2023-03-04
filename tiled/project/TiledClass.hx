@@ -15,16 +15,24 @@ import tiled.Tiled;
 @:using(tiled.project.TiledClass.TiledClassTools)
 interface TiledClass {
   #if (tiled_props=="project")
+  /**
+    Used to load the properties. DO NOT IMPLEMENT.
+  **/
   function loadProperties(properties: PropertyIterator, loader: Tiled, path: String): Void;
+  /**
+    Runs at the final stage of the map parsing and primarily used to fill up the TmxObject references.
+    
+    If implemented, the method core will be appended to the generated method.
+  **/
   function finalize(objects: Array<TmxObject>, path: String, loader: Tiled): Void;
   /**
-    Only works for classes that supports `initObject`, for any others will return `null`.
+    Only works for classes that supports `initObject`, for any others will return `null`. DO NOT IMPLEMENT.
     
     Used when `Tiled.transferTileClassToObject` is enabled to copy the TiledClass instance from the tile to an object.
   **/
   function transferToObject(obj: TmxObject): TiledClass;
   /**
-    Only works for classes that support `initTileset`, for any others will return `null`.
+    Only works for classes that support `initTileset`, for any others will return `null`. DO NOT IMPLEMENT.
     
     Used when map tileset copies data from TSX tileset.
   **/
