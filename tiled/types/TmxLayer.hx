@@ -206,14 +206,17 @@ class TmxLayer {
     var out = [];
     var i = 0;
     var j = 0;
+    inline function add() 
+      out.push(TmxTileIndex.safeParse(data.substring(j, i)));
     final len = data.length;
     while (i < len) {
       if (data.charCodeAt(i) == ','.code) {
-        out.push(TmxTileIndex.safeParse(data.substring(j, i)));
+        add();
         j = i + 1;
       }
       i++;
     }
+    if (i != j) add();
     return out;
   }
   
