@@ -250,34 +250,42 @@ class TmxLayer {
 
 abstract TmxTileIndex(Int) from Int {
   
+  public static inline extern var HORIZONTAL_FLIP_FLAG = 0x80000000;
+  public static inline extern var VERTICAL_FLIP_FLAG = 0x40000000;
+  public static inline extern var DIAGONAL_FLIP_FLAG = 0x20000000;
+  
   public var flippedHorizontally(get, set):Bool;
   public var flippedVertically(get, set):Bool;
   public var flippedDiagonally(get, set):Bool;
   public var gid(get, set):Int;
   public var raw(get, set):Int;
+  public var flipFlags(get, set): Int;
   
   public static inline function safeParse(val:String):TmxTileIndex return val.parseUint();
   
   public inline function new(idx:Int) this = idx;
   
-  inline function get_flippedHorizontally():Bool return this & 0x80000000 != 0;
-  inline function get_flippedVertically():Bool return this & 0x40000000 != 0;
-  inline function get_flippedDiagonally():Bool return this & 0x20000000 != 0;
+  inline function get_flippedHorizontally():Bool return this & HORIZONTAL_FLIP_FLAG != 0;
+  inline function get_flippedVertically():Bool return this & VERTICAL_FLIP_FLAG != 0;
+  inline function get_flippedDiagonally():Bool return this & DIAGONAL_FLIP_FLAG != 0;
   inline function get_gid():Int return (this & 0x1FFFFFFF);
   
   inline function get_raw():Int return this;
   inline function set_raw(v):Int return this = v;
   
+  inline function get_flipFlags(): Int return (this & 0xE0000000);
+  inline function set_flipFlags(v): Int return this = gid | v;
+  
   inline function set_flippedHorizontally(v:Bool):Bool {
-    this = this & 0x7FFFFFFF | (v ? 0x80000000 : 0);
+    this = this & 0x7FFFFFFF | (v ? HORIZONTAL_FLIP_FLAG : 0);
     return v;
   }
   inline function set_flippedVertically(v:Bool):Bool {
-    this = this & 0xBFFFFFFF | (v ? 0x40000000 : 0);
+    this = this & 0xBFFFFFFF | (v ? VERTICAL_FLIP_FLAG : 0);
     return v;
   }
   inline function set_flippedDiagonally(v:Bool):Bool {
-    this = this & 0xDFFFFFFF | (v ? 0x20000000 : 0);
+    this = this & 0xDFFFFFFF | (v ? DIAGONAL_FLIP_FLAG : 0);
     return v;
   }
   inline function set_gid(v:Int):Int {

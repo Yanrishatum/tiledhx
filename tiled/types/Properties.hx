@@ -501,7 +501,6 @@ private class PropertiesImpl {
   **/
   public function deLocalize(path:String) {
     for (p in props) {
-      // TODO: Better indicator that TFile is already localized.
       if (p.type == TFile) {
         _deLocalize(p, path);
       } else if (p.type == TClass) {

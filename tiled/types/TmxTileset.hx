@@ -138,7 +138,7 @@ class TmxTileset {
   #if (tiled_props=="project")
   public var tclass: TiledClass;
   #else
-  public var properties:Properties;
+  public var properties:Properties = new Properties();
   #end
   
   public var path:String;
